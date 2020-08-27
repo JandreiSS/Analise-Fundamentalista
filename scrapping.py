@@ -15,8 +15,10 @@ header = {
 
 url = 'http://fundamentus.com.br/resultado.php'
 
+print('Realizando requisição...')
 r = requests.get(url, headers=header)
 
+print('Lendo a página...')
 df = pd.read_html(r.text, thousands='.', decimal=',')[0]
 
 for coluna in ['Div.Yield', 'Mrg Ebit', 'Mrg. Líq.', 'ROIC', 'ROE', 'Cresc. Rec.5a']:
@@ -24,9 +26,11 @@ for coluna in ['Div.Yield', 'Mrg Ebit', 'Mrg. Líq.', 'ROIC', 'ROE', 'Cresc. Rec
   df[coluna] = df[coluna].str.replace(',', '.')
   df[coluna] = df[coluna].str.rstrip('%').astype('float') / 100
 
+# valor_liq_2m = float(input(print('Retornar empresas com lucro líquido dos últimos dois meses superior a: R$', end=' ', flush=False)))
 # define o valor de corte para as empresas a aparecerem
 df = df[df['Liq.2meses'] > 1000000]
 
+print('Realizando cálculo para o ranking...')
 ranking = pd.DataFrame()
 ranking['Position'] = range(1,151)
 ranking['EV/EBIT'] = df[df['EV/EBIT'] > 0].sort_values(by=['EV/EBIT'])['Papel'][:150].values
@@ -38,7 +42,7 @@ t = pd.concat([auxA, auxB])
 
 rank = t.dropna(axis=1).sum().astype(int).sort_values()
 
-rank.to_csv('ranking.csv', index=True, sep=';', header=False)
+rank.to_csv('C:/Users/Jandrei/Desktop/Apps/AnaliseFundamentalista/ranking.csv', index=True, sep=';', header=False)
 
 df = df.loc[:,['Papel']]
 
@@ -59,6 +63,7 @@ def requestUrls(urls, timeout = 5):
                 
 urls = 'https://www.fundamentus.com.br/detalhes.php?papel=' + df['Papel'].values
 
+print('\nPROCESSAMENTO DE REQUISIÇÕES\n')
 requisicoes = requestUrls(urls, timeout=60)
 
 lista_empresas = []
@@ -118,4 +123,6 @@ for key in tqdm(range(total_lista), unit=' dados', desc='Tratando dados: ', disa
 for coluna in ['ROE', 'Div. Yield', 'ROIC']:
     tabela_base[coluna] = tabela_base[coluna].str.rstrip('%')
     
-tabela_base.to_csv('tabela_dados.csv', index=False, sep=';')
+tabela_base.to_csv('C:/Users/Jandrei/Desktop/Apps/AnaliseFundamentalista/tabela_dados.csv', index=False, sep=';')
+
+print('\nDados atualizados')
